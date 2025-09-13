@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <title>OrbitX6</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+      html { height: 100%; }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000000 url(loading.gif) center center no-repeat;
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 13px;
+        line-height: 20px;
+        height: 100%;
+      }
+
+      #info {
+        font-size: 11px;
+        position: absolute;
+        bottom: 5px;
+        background-color: rgba(0,0,0,0.8);
+        border-radius: 3px;
+        right: 10px;
+        padding: 10px;
+      }
+
+      a { color: #aaa; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      .bull {
+        padding: 0 5px;
+        color: #555;
+        cursor: pointer;
+      }
+      .bull:hover { color: #fff; }
+
+      #title {
+        position: absolute;
+        top: 20px;
+        width: 270px;
+        left: 20px;
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 3px;
+        font: 20px Gill Sans MT;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+
+  <div id="container"></div>
+
+  <div id="info">
+    <strong>Created by <a>ORBITX6 Team</a></strong>
+    <span class="bull">&bull;</span>
+    <span class="bull">&bull;</span>
+    Based on <a href="http://code.google.com/p/webgl-globe/">Weather Forcasting</a>
+  </div>
+
+  <div id="title">
+    <span style="font-size:200%">OrbitX6</span>
+    <br>&nbsp;<br>
+    <table>
+     <tr>
+      <td></td>
+      <td style="font-size:60%;text-align:center">&larr; speed / detail &rarr;</td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('en',1)">CO2 conc.</span></td>
+      <td>
+        <span id="en1" class="bull">&bull;</span>
+        <span id="en2" class="bull">&bull;</span>
+        <span id="en3" class="bull">&bull;</span>
+        <span id="en4" class="bull">&bull;</span>
+        <span id="en5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('fr',1)">UV Radiation</span></td>
+      <td>
+        <span id="fr1" class="bull">&bull;</span>
+        <span id="fr2" class="bull">&bull;</span>
+        <span id="fr3" class="bull">&bull;</span>
+        <span id="fr4" class="bull">&bull;</span>
+        <span id="fr5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('ca',1)">Impacts</span></td>
+      <td>
+        <span id="ca1" class="bull">&bull;</span>
+        <span id="ca2" class="bull">&bull;</span>
+        <span id="ca3" class="bull">&bull;</span>
+        <span id="ca4" class="bull">&bull;</span>
+        <span id="ca5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('it',1)">orbital debris</span></td>
+      <td>
+        <span id="it1" class="bull">&bull;</span>
+        <span id="it2" class="bull">&bull;</span>
+        <span id="it3" class="bull">&bull;</span>
+        <span id="it4" class="bull">&bull;</span>
+        <span id="it5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('el',1)">Aerosol conc.</span></td>
+      <td>
+        <span id="el1" class="bull">&bull;</span>
+        <span id="el2" class="bull">&bull;</span>
+        <span id="el3" class="bull">&bull;</span>
+        <span id="el4" class="bull">&bull;</span>
+        <span id="el5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('ru',1)">Soil Hydrology</span></td>
+      <td>
+        <span id="ru1" class="bull">&bull;</span>
+        <span id="ru2" class="bull">&bull;</span>
+        <span id="ru3" class="bull">&bull;</span>
+        <span id="ru4" class="bull">&bull;</span>
+        <span id="ru5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('zh',1)">Tornado</span></td>
+      <td>
+        <span id="zh1" class="bull">&bull;</span>
+        <span id="zh2" class="bull">&bull;</span>
+        <span id="zh3" class="bull">&bull;</span>
+        <span id="zh4" class="bull">&bull;</span>
+        <span id="zh5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('he',1)">Hurricane</span></td>
+      <td>
+        <span id="he1" class="bull">&bull;</span>
+        <span id="he2" class="bull">&bull;</span>
+        <span id="he3" class="bull">&bull;</span>
+        <span id="he4" class="bull">&bull;</span>
+        <span id="he5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('ko',1)">Magnetic</span></td>
+      <td>
+        <span id="ko1" class="bull">&bull;</span>
+        <span id="ko2" class="bull">&bull;</span>
+        <span id="ko3" class="bull">&bull;</span>
+        <span id="ko4" class="bull">&bull;</span>
+        <span id="ko5" class="bull">&bull;</span>
+      </td>
+     </tr>
+     <tr>
+      <td><span onclick="loadData('wd',1)">Wikidata</span></td>
+      <td>
+        <span id="wd1" class="bull">&bull;</span>
+        <span id="wd2" class="bull">&bull;</span>
+        <span id="wd3" class="bull">&bull;</span>
+        <span id="wd4" class="bull">&bull;</span>
+        <span id="wd5" class="bull">&bull;</span>
+      </td>
+     </tr>
+    </table>
+    <br>&nbsp;<br>
+    <span id="load"> </span>
+  </div>
+  
+  <script type="text/javascript" src="third-party/Three/ThreeWebGL.js"></script>
+  <script type="text/javascript" src="third-party/Three/ThreeExtras.js"></script>
+  <script type="text/javascript" src="third-party/Three/RequestAnimationFrame.js"></script>
+  <script type="text/javascript" src="third-party/Three/Detector.js"></script>
+  <script type="text/javascript" src="globe.js"></script>
+
+  <script type="text/javascript">
+/* ---------------------------
+   Initialization / loadData
+   --------------------------- */
+
+if(!Detector.webgl){
+  Detector.addGetWebGLMessage();
+} else {
+  var container = document.getElementById('container');
+  window.globe = new DAT.Globe(container);
+  var currentLang = 'en';
+  var currentRes = 1;
+window.rotationSpeed = 0.003;
+  // loadData stays the same, but we DO NOT call globe.animate() unguarded
+  window.loadData = function(lang, res) {
+    // safely update UI selected dot color (if exists)
+    if (document.getElementById(currentLang + currentRes)) {
+      document.getElementById(currentLang + currentRes).style.color = '#555';
+    }
+    currentLang = lang;
+    currentRes = res;
+    if (document.getElementById(currentLang + currentRes)) {
+      document.getElementById(currentLang + currentRes).style.color = '#fff';
+    }
+
+    document.getElementById('load').innerHTML = 'Loading...';
+    var xhr;
+    xhr = new XMLHttpRequest();
+    xhr.open('GET', 'data/data-' + lang + res + '.json', true);
+
+    xhr.onreadystatechange = function(e) {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          globe.clearData();
+          globe.addData(data);
+          globe.createPoints();
+
+          // START animate only once (guarded) so multiple loops aren't created
+          if (!window.globeAnimating && typeof globe.animate === 'function') {
+            globe.animate();
+            window.globeAnimating = true;
+            console.log("globe.animate() started (first time).");
+          } else {
+            // already animating — do not call again
+            // console.log("globe already animating; not starting again.");
+          }
+
+          document.getElementById('load').innerHTML = ' ';
+        } else {
+          // optional: handle non-200 (show message or console)
+          console.warn("Data load failed:", xhr.status);
+        }
+      }
+    };
+    xhr.send(null);
+  };
+
+  // initial load
+  loadData('en', 1);
+}
+
+/* ---------------------------
+   Rotation speed and buttons
+   --------------------------- */
+
+// balanced speeds (left = fastest, right = slowest)
+const speedLevels = [0.003, 0.0015, 0.0009, 0.0006, 0.0002];
+
+// default rotation speed (middle)
+window.rotationSpeed = speedLevels[2];
+
+// Hook up click handlers for the dots (span.bull)
+document.querySelectorAll('span.bull').forEach((btn) => {
+  // ignore decorative bullets that have no id (like the two in #info)
+  if (!btn.id) return;
+
+  btn.addEventListener('click', () => {
+    var match = btn.id.match(/^([a-z]+)(\d)$/);
+    if (!match) return;
+
+    var lang = match[1];
+    var res = parseInt(match[2], 10);
+
+    // 1) set correct rotation speed for that dot (no accumulation)
+    //    map res 1..5 to speedLevels[0..4]
+    window.rotationSpeed = speedLevels[Math.max(0, Math.min(speedLevels.length - 1, res - 1))];
+
+    // 2) load the requested dataset (this will not restart animation loop)
+    loadData(lang, res);
+
+    console.log(`Clicked ${btn.id} → lang=${lang}, res=${res}, speed=${window.rotationSpeed}`);
+  });
+});
+
+/* ---------------------------
+   Optional safety: if globe.animate() is implemented inside globe.js using
+   target.x += rotationSpeed, make sure globe.js reads window.rotationSpeed.
+   (This code ensures globe.animate() is only started once.)
+   --------------------------- */
+   
+  </script>
+
+  </body>
+</html>
