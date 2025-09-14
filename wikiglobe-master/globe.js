@@ -20,9 +20,9 @@ DAT.Globe = function(container, colorFn) {
   colorFn = colorFn || function(x) {
     var c = new THREE.Color();
     if (x==0.0) {
-    	c.setHSV( ( 0.6 - ( x * 0.5 ) ), 0, 0 );
+      c.setHSV( ( 0.6 - ( x * 0.5 ) ), 0, 0 );
     } else {
-    	c.setHSV( ( 0.6 - ( x * 0.5 ) ), 1.0, 1.0 );
+      c.setHSV( ( 0.6 - ( x * 0.5 ) ), 1.0, 1.0 );
     }
     return c;
   };
@@ -72,8 +72,8 @@ DAT.Globe = function(container, colorFn) {
     }
   };
 
-  var camera, scene, sceneAtmosphere, renderer, w, h;
-  var vector, mesh, atmosphere, point;
+  var camera, scene, sceneAtmosphere, sceneSkybox, renderer, w, h;
+  var vector, mesh, atmosphere, point, stars;
 
   var overRenderer;
 
@@ -87,7 +87,8 @@ DAT.Globe = function(container, colorFn) {
       target = { x: Math.PI*3/2, y: Math.PI / 6.0 },
       targetOnDown = { x: 0, y: 0 };
 
-  var distance = 100000, distanceTarget = 100000;
+  // CORRECTED: Set a reasonable starting distance for the camera
+  var distance = 1000, distanceTarget = 1000;
   var padding = 40;
   var PI_HALF = Math.PI / 2;
 
@@ -108,36 +109,75 @@ DAT.Globe = function(container, colorFn) {
 
     scene = new THREE.Scene();
     sceneAtmosphere = new THREE.Scene();
+    sceneSkybox = new THREE.Scene();
+        
+    var starGeometry = new THREE.Geometry();
 
+    for (var i = 0; i < 5000; i++) {
+        var starPosition = new THREE.Vector3();
+        starPosition.x = Math.random() * 2 - 1;
+        starPosition.y = Math.random() * 2 - 1;
+        starPosition.z = Math.random() * 2 - 1;
+        starPosition.normalize();
+        starPosition.multiplyScalar(2000);
+
+        var starColor = new THREE.Color(0xffffff);
+        starColor.brightness = 0.05 + Math.random() * 0.95;
+        starColor.twinkleSpeed = 0.02 + Math.random() * 0.05;
+        starColor.twinkleDirection = Math.random() > 0.5 ? 1 : -1;
+
+        starGeometry.vertices.push(new THREE.Vertex(starPosition));
+        starGeometry.colors.push(starColor);
+    }
+
+    var starMaterial = new THREE.ParticleBasicMaterial({
+        size: 15.5,
+        vertexColors: true
+    });
+
+    stars = new THREE.ParticleSystem(starGeometry, starMaterial);
+    sceneSkybox.addObject(stars);
+        
     var geometry = new THREE.Sphere(200, 40, 30);
 
     shader = Shaders['earth'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].texture = THREE.ImageUtils.loadTexture(imgDir+'world' +
-        '.jpg');
+    uniforms['texture'].texture = THREE.ImageUtils.loadTexture(imgDir+'world' + '.jpg');
 
     material = new THREE.MeshShaderMaterial({
-
           uniforms: uniforms,
           vertexShader: shader.vertexShader,
           fragmentShader: shader.fragmentShader
-
         });
 
     mesh = new THREE.Mesh(geometry, material);
     mesh.matrixAutoUpdate = false;
     scene.addObject(mesh);
 
+    // ## NEW FEATURE: Add a planetary ring system ##
+    // This creates a Torus geometry to serve as the ring.
+    var ringGeometry = new THREE.Torus(280, 8, 2, 80); // You can tweak these values: (radius, tube thickness, radial segments, tubular segments)
+    // We use a basic material so it doesn't need any lights to be visible.
+    var ringMaterial = new THREE.MeshBasicMaterial({
+      color: 0x666666,      // A greyish color for the ring
+      transparent: true,
+      opacity: 0.5
+    });
+    var ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.x = 1.5; // Tilt the ring by 1.5 radians
+    ring.flipSided = true; // Make sure the ring is visible when viewed from below
+    scene.addObject(ring);
+    // ## END OF NEW FEATURE ##
+
+
     shader = Shaders['atmosphere'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
     material = new THREE.MeshShaderMaterial({
-
           uniforms: uniforms,
           vertexShader: shader.vertexShader,
           fragmentShader: shader.fragmentShader
-
         });
 
     mesh = new THREE.Mesh(geometry, material);
@@ -151,10 +191,8 @@ DAT.Globe = function(container, colorFn) {
           nx: true, py: true, ny: true, pz: false, nz: true});
 
     for (var i = 0; i < geometry.vertices.length; i++) {
-
       var vertex = geometry.vertices[i];
       vertex.position.z += 0.5;
-
     }
 
     point = new THREE.Mesh(geometry);
@@ -169,11 +207,8 @@ DAT.Globe = function(container, colorFn) {
     container.appendChild(renderer.domElement);
 
     container.addEventListener('mousedown', onMouseDown, false);
-
     container.addEventListener('mousewheel', onMouseWheel, false);
-
     document.addEventListener('keydown', onDocumentKeyDown, false);
-
     window.addEventListener('resize', onWindowResize, false);
 
     container.addEventListener('mouseover', function() {
@@ -197,7 +232,6 @@ DAT.Globe = function(container, colorFn) {
       addPoint(lat, lng, size, color, subgeo);
     }
     this._baseGeometry = subgeo;
-
   };
 
   function createPoints() {
@@ -211,7 +245,6 @@ DAT.Globe = function(container, colorFn) {
     }
   }
   
-
   function addPoint(lat, lng, size, color, subgeo) {
     var phi = (90 - lat) * Math.PI / 180;
     var theta = (180 - lng) * Math.PI / 180;
@@ -226,9 +259,7 @@ DAT.Globe = function(container, colorFn) {
     point.updateMatrix();
     var i;
     for (i = 0; i < point.geometry.faces.length; i++) {
-
       point.geometry.faces[i].color = color;
-
     }
 
     GeometryUtils.merge(subgeo, point);
@@ -319,6 +350,22 @@ DAT.Globe = function(container, colorFn) {
   function render() {
     zoom(curZoomSpeed);
 
+    if (stars) {
+      var colors = stars.geometry.colors;
+      for (var i = 0; i < colors.length; i++) {
+        var starColor = colors[i];
+        
+        starColor.brightness += starColor.twinkleDirection * starColor.twinkleSpeed;
+        
+        if (starColor.brightness > 1.0 || starColor.brightness < 0.2) {
+          starColor.twinkleDirection *= -1;
+        }
+        
+        starColor.setHSV(0, 0, starColor.brightness);
+      }
+      stars.geometry.colorsNeedUpdate = true;
+    }
+  
     rotation.x += (target.x - rotation.x) * 0.1;
     rotation.y += (target.y - rotation.y) * 0.1;
     distance += (distanceTarget - distance) * 0.3;
@@ -330,6 +377,7 @@ DAT.Globe = function(container, colorFn) {
     vector.copy(camera.position);
 
     renderer.clear();
+    renderer.render(sceneSkybox, camera);
     renderer.render(scene, camera);
     renderer.render(sceneAtmosphere, camera);
   }
@@ -342,18 +390,14 @@ DAT.Globe = function(container, colorFn) {
   this.scene = scene;
   
   this.clearData = function() {
-  	// I am pretty sure I am doing it wrong, but there is no documentation I can
-  	// find on the Web, and it is quarter past two in the night, so I will go with
-  	// "this seems superficially to work enough for a throwaway website"
-  	if (this.scene.__webglObjects)
-	  	while (this.scene.__webglObjects.length > 1)
-  			this.scene.__webglObjects.pop();
-  	if (this.scene.children)
-  		while (this.scene.children.length > 1)
-  			this.scene.removeChild(this.scene.children[this.scene.children.length-1]);
+    if (this.scene.__webglObjects)
+      while (this.scene.__webglObjects.length > 1)
+        this.scene.__webglObjects.pop();
+    if (this.scene.children)
+      while (this.scene.children.length > 1)
+        this.scene.removeChild(this.scene.children[this.scene.children.length-1]);
   };
 
   return this;
 
 };
-
